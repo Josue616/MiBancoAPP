@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:latlong2/latlong.dart';
 
 class NegocioScreen extends StatefulWidget {
   final String numeroTelefono;
@@ -17,15 +18,12 @@ class _NegocioScreenState extends State<NegocioScreen> {
   final _latitudController = TextEditingController();
   final _longitudController = TextEditingController();
   String _rubroSeleccionado = 'Rubro1';
-  GoogleMapController? _mapController;
-  LatLng _posicionInicial = const LatLng(-18.013937, -70.250862);
-
-  void _onMapCreated(GoogleMapController controller) {
-    _mapController = controller;
-  }
+  LatLng _posicionActual =
+      LatLng(-18.013937, -70.250862); // Posición inicial en el mapa
 
   void _onTap(LatLng position) {
     setState(() {
+      _posicionActual = position;
       _latitudController.text = position.latitude.toString();
       _longitudController.text = position.longitude.toString();
     });
@@ -74,25 +72,43 @@ class _NegocioScreenState extends State<NegocioScreen> {
               SizedBox(height: 10),
               Container(
                 height: 300,
-                child: GoogleMap(
-                  onMapCreated: _onMapCreated,
-                  initialCameraPosition: CameraPosition(
-                    target: _posicionInicial,
-                    zoom: 15,
+                child: FlutterMap(
+                  options: MapOptions(
+                    center: _posicionActual,
+                    zoom: 13.0,
+                    onTap: (_, position) => _onTap(position),
                   ),
-                  onTap: _onTap,
+                  layers: [
+                    TileLayerOptions(
+                      urlTemplate:
+                          "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                      subdomains: ['a', 'b', 'c'],
+                    ),
+                    MarkerLayerOptions(
+                      markers: [
+                        Marker(
+                          point: _posicionActual,
+                          builder: (context) => Icon(
+                            Icons.location_on,
+                            size: 40.0,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
               SizedBox(height: 10),
               TextField(
                 controller: _latitudController,
                 decoration: InputDecoration(labelText: 'Latitud'),
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
               ),
               TextField(
                 controller: _longitudController,
                 decoration: InputDecoration(labelText: 'Longitud'),
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
               ),
               DropdownButton<String>(
                 value: _rubroSeleccionado,
