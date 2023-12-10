@@ -94,36 +94,20 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          gradient: LinearGradient(
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-            colors: [Colors.white, Colors.green.withOpacity(0.2)],
-          ),
-        ),
+        color: Colors.white, // Fondo completamente blanco
         child: Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(10.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text(
-                'MiBanco',
-                style: TextStyle(
-                  fontSize: 36,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
-                ),
-              ),
-              Text(
-                'EMPRENDEDOR',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontStyle: FontStyle.italic,
-                  color: Colors.yellow,
-                ),
+              Image.asset(
+                'assets/MiBancoEmprendedorLogo.png', // Ruta a la imagen que quieras mostrar
+                width: screenWidth * 0.8, // 50% del ancho de la pantalla
+                height: screenHeight * 0.3, // 20% del alto de la pantalla
               ),
               SizedBox(height: 30),
               TextField(
@@ -145,9 +129,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 keyboardType: TextInputType.number,
               ),
               SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _login,
-                child: Text('Iniciar Sesión'),
+              Padding(
+                // Se agregó el Padding aquí
+                padding: EdgeInsets.only(top: 30.0),
+                child: ElevatedButton(
+                  onPressed: _login,
+                  child: Text('Iniciar Sesión'),
+                ),
               ),
             ],
           ),

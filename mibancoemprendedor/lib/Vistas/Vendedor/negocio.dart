@@ -17,7 +17,7 @@ class _NegocioScreenState extends State<NegocioScreen> {
   final _nombreController = TextEditingController();
   final _latitudController = TextEditingController();
   final _longitudController = TextEditingController();
-  String _rubroSeleccionado = 'Rubro1';
+  String _rubroSeleccionado = 'Electrónica y Tecnología';
   LatLng _posicionActual =
       LatLng(-18.013937, -70.250862); // Posición inicial en el mapa
 
@@ -117,8 +117,18 @@ class _NegocioScreenState extends State<NegocioScreen> {
                     _rubroSeleccionado = newValue!;
                   });
                 },
-                items: <String>['Rubro1', 'Rubro2', 'Rubro3']
-                    .map<DropdownMenuItem<String>>((String value) {
+                items: <String>[
+                  'Electrónica y Tecnología',
+                  'Moda y Accesorios',
+                  'Alimentos y Bebidas',
+                  'Salud y Belleza',
+                  'Deportes y Entretenimiento',
+                  'Juguetes y Juegos',
+                  'Libros y Educación',
+                  'Hogar y Jardinería',
+                  'Automotriz y Herramientas',
+                  'Arte y Artesanía',
+                ].map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(value),
