@@ -6,7 +6,7 @@ import 'package:mibancoemprendedor/Vistas/Vendedor/explorar.dart';
 import 'package:mibancoemprendedor/main.dart';
 import 'package:mibancoemprendedor/Vistas/Vendedor/negocio.dart';
 import 'package:mibancoemprendedor/Vistas/Vendedor/cupones.dart';
-import 'escanear.dart';
+import 'migrar.dart';
 
 class VendedorScreen extends StatefulWidget {
   final String numeroTelefono;
@@ -27,62 +27,9 @@ class _VendedorScreenState extends State<VendedorScreen> {
     _cargarDatos();
   }
 
-  void _mostrarDialogoMigrarCupon(int idCupon) {
-    TextEditingController numeroTelefonoController = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Migrar Cupón'),
-          content: TextField(
-            controller: numeroTelefonoController,
-            decoration: InputDecoration(hintText: "Ingrese número de teléfono"),
-            keyboardType: TextInputType.number,
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Cancelar'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Migrar'),
-              onPressed: () {
-                _migrarCupon(idCupon, numeroTelefonoController.text);
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   Future<void> _cargarDatos() async {
     await _obtenerSaldo();
     await _obtenerCupones();
-  }
-
-  Future<void> _migrarCupon(int idCupon, String numeroTelefono) async {
-    var url = 'http://161.132.37.95:5000/migrar-cupon';
-    var response = await http.post(
-      Uri.parse(url),
-      headers: {"Content-Type": "application/json"},
-      body: json.encode({
-        "id_cupon": idCupon,
-        "numero_telefono": numeroTelefono,
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Cupón migrado con éxito')));
-      _refrescarPantalla();
-    } else {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error al migrar cupón')));
-    }
   }
 
   Future<void> _obtenerSaldo() async {
@@ -235,11 +182,7 @@ class _VendedorScreenState extends State<VendedorScreen> {
           icon: Icons.qr_code_scanner,
           iconColor: Colors.green,
           heroTag: 'escanearCuponBtn',
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => EscanearScreen(),
-            ),
-          ),
+          onPressed: () {/* ... */},
         ),
         // Nuevo botón para Explorar
         _buildRoundButton(
@@ -318,7 +261,8 @@ class _VendedorScreenState extends State<VendedorScreen> {
   }
 
   Widget _buildListaCuponesConScroll() {
-    double cuponesHeight = 300.0; // Ajusta según necesidades
+    // Se asume un alto fijo para la lista de cupones, ajusta según necesidades.
+    double cuponesHeight = 300.0;
 
     return Container(
       height: cuponesHeight,
@@ -330,10 +274,11 @@ class _VendedorScreenState extends State<VendedorScreen> {
             child: ListTile(
               title: Text(cupon['nombre_tienda']),
               subtitle: Text('Valor: S/. ${cupon['valor_descuento']}'),
-              onTap: () => _mostrarDialogoMigrarCupon(cupon['id_cupon']),
             ),
           );
         },
+        // Este es el scroll independiente para la lista de cupones
+        scrollDirection: Axis.vertical,
       ),
     );
   }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:barcode_scan2/barcode_scan2.dart';
+import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 class EscanearScreen extends StatefulWidget {
   @override
@@ -7,48 +7,83 @@ class EscanearScreen extends StatefulWidget {
 }
 
 class _EscanearScreenState extends State<EscanearScreen> {
-  String qrCodeResult = "No escaneado aún";
+  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  QRViewController? controller;
+  Barcode? result;
 
-  Future<void> _scanQR() async {
-    try {
-      var result = await BarcodeScanner.scan();
-      setState(() => qrCodeResult = result.rawContent);
-    } catch (e) {
-      setState(() => qrCodeResult = 'Error: ${e.toString()}');
-    }
+  void _onQRViewCreated(QRViewController controller) {
+    this.controller = controller;
+    controller.scannedDataStream.listen((scanData) {
+      setState(() {
+        result = scanData;
+        if (result != null) {
+          controller.pauseCamera();
+          // Asegúrate de que result.code no sea null antes de usarlo
+          _showQRPopup(result!.code ?? 'Código QR no encontrado');
+        }
+      });
+    });
+  }
+
+  void _showQRPopup(String qrCode) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('QR Code'),
+        content: Text('El código es: $qrCode'),
+        actions: <Widget>[
+          TextButton(
+            // Aquí se reemplazó FlatButton por TextButton
+            child: Text('Cerrar'),
+            onPressed: () {
+              Navigator.of(context).pop();
+              controller?.resumeCamera();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    controller?.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Escanear QR"),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              "Resultado del Escaneo",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            Text(
-              qrCodeResult,
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 20),
-            TextButton(
-              onPressed: () => _scanQR(),
-              child: Text("Escanear QR"),
-              style: TextButton.styleFrom(
-                primary: Colors.white, // Color del texto
-                backgroundColor: Colors.blue, // Color del fondo
+      appBar: AppBar(title: Text('Escanear QR')),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            flex: 5,
+            child: QRView(
+              key: qrKey,
+              onQRViewCreated: _onQRViewCreated,
+              overlay: QrScannerOverlayShape(
+                borderColor: Colors.red,
+                borderRadius: 10,
+                borderLength: 30,
+                borderWidth: 10,
+                cutOutSize: MediaQuery.of(context).size.width * 0.8,
               ),
-            )
-          ],
-        ),
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: Center(
+              child: (result != null)
+                  ? Text(
+                      'Código de barras Tipo: ${result!.format}   Datos: ${result!.code}')
+                  : Text('Escanea un código'),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
+
+void main() => runApp(MaterialApp(home: EscanearScreen()));
